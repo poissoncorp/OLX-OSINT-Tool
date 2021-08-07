@@ -40,7 +40,7 @@ if __name__ == '__main__':
     offers_urls = scrap_offers_urls(pages)
     out('I', 'Found ' + str(len(offers_urls)) + ' offers')
     sellers = scrap_offers(offers_urls)
-    out('I', 'Found ' + str(len(sellers)) + ' sellers')
+    out('I', 'Found ' + str(len(sellers)) + ' unique sellers')
 
     file_path = 'olx_sellers_' + str(time()).split('.')[0] + '.json'
     with open(file_path, 'a') as file:
