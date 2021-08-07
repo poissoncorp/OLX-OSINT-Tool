@@ -82,17 +82,22 @@ def scrap_offers(offers_urls):
 
         sellers.append(seller)
 
+    sellers_fixed = []
+
     for seller in sellers:
         if seller['url']:
             for duplicate in [i for i in sellers if i['url'] == seller['url']]:
-                seller['offers'].append(duplicate['offers'][0])
+                if duplicate['offers'][0] not in seller['offers']:
+                    seller['offers'].append(duplicate['offers'][0])
                 sellers.remove(duplicate)
         else:
             # amogus 😳😳
             for sus in [i for i in sellers if i['name'] == seller['name']]:
                 if sus['registered_since'] == seller['registered_since']:
                     if sus['last_online'] == seller['last_online']:
-                        seller['offers'].append(sus['offers'][0])
+                        if sus['offers'][0] not in seller['offers']:
+                            seller['offers'].append(sus['offers'][0])
                         sellers.remove(sus)
+        sellers_fixed.append(seller)
 
-    return sellers
+    return sellers_fixed
