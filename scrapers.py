@@ -1,27 +1,20 @@
 from requests import post, get
 from json import loads
 from tqdm import tqdm
-
-def autocomplete(region):
-    r = post(
-        'https://www.olx.pl/ajax/geo6/autosuggest/',
-        data = {
-            'data': region
-        }
-    )
-    return loads(r.text)['data']
-
-
 from requests import get
 from bs4 import BeautifulSoup as bs
 
+
+def autocomplete(region):
+    r = post('https://www.olx.pl/ajax/geo6/autosuggest/', data={'data': region})
+    return loads(r.text)['data']
+
+
 def get_pages(city_id):
-    r = bs(post(
-        'https://www.olx.pl/oferty/',
-        data = {
-            'search[city_id]': city_id
-        }
-    ).text, features='html.parser')
+    r = bs(
+        post('https://www.olx.pl/oferty/', data={'search[city_id]': city_id}).text,
+        features='html.parser',
+    )
 
     pages = []
     for page in r.find('div', {'class': 'pager'}).find_all('a')[:-1]:
@@ -30,12 +23,12 @@ def get_pages(city_id):
 
     return pages
 
+
 def scrap_offers_urls(pages):
     offers = []
+    list(map(lambda page: bs(get(page).text, features='html.parser').find_all('div', {}),pages))
     for page in pages:
-        r = bs(get(
-            page
-        ).text, features='html.parser')
+        r = bs(get(page).text, features='html.parser')
 
         for offer in r.find_all('div', {'class': 'offer-wrapper'}):
             url = offer.find('a')['href']
@@ -44,23 +37,20 @@ def scrap_offers_urls(pages):
 
     return offers
 
+
 def scrap_offers(offers_urls):
     sellers = []
 
     for i in tqdm(range(len(offers_urls)), desc='Scraping..'):
-        r = bs(get(
-            offers_urls[i]
-        ).text, features='html.parser')
+        r = bs(get(offers_urls[i]).text, features='html.parser')
         card = r.find('div', {'data-cy': 'seller_card'})
 
         seller = {
             'name': card.find('h2').text,
-            'offers': [
-                offers_urls[i]
-            ],
+            'offers': [offers_urls[i]],
             'fb_connected': False,
             'avatar': None,
-            'last_online': card.find('span').text.replace('Ostatnio online ', '')
+            'last_online': card.find('span').text.replace('Ostatnio online ', ''),
         }
 
         if card.find('a'):
@@ -74,11 +64,9 @@ def scrap_offers(offers_urls):
             elif 'avatar' in img['alt']:
                 seller['avatar'] = img['src']
 
-        seller['registered_since'] = (
-            [i for i in card.find_all('div') if 'Na OLX od' in i.text][-1]
-            .text
-            .replace('Na OLX od ', '')
-        )
+        seller['registered_since'] = [
+            i for i in card.find_all('div') if 'Na OLX od' in i.text
+        ][-1].text.replace('Na OLX od ', '')
 
         sellers.append(seller)
 

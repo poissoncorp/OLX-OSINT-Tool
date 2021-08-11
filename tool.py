@@ -3,6 +3,7 @@ from utils import *
 from json import dumps
 from time import time
 
+
 def get_region():
     while True:
         region_to_search = out('?', 'Region to search')
@@ -30,6 +31,7 @@ def get_region():
         else:
             out('W', 'Region not found!', 4)
     return region_id
+
 
 if __name__ == '__main__':
     region_id = get_region()
